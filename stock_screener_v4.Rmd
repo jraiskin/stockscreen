@@ -1,0 +1,142 @@
+---
+title: "Stock Screener test V4"
+author: "Yarden"
+output: html_document
+---
+
+<!-- some formatting -->
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+```{r comments_resources, include=FALSE}
+# log scale plotting: ( scale_x_log10() )
+# http://www.sthda.com/english/wiki/ggplot2-axis-scales-and-transformations
+# http://docs.ggplot2.org/current/scale_continuous.html
+# layout(p, xaxis = list(type = "log"),
+#        yaxis = list(type = "log"))
+
+# plot histogram with density
+# http://r4stats.com/examples/graphics-ggplot2/
+
+# some USEFUL crosstalk examples
+# https://github.com/jcheng5/plotly/tree/joe/feature/crosstalk/inst/examples/crosstalk
+
+# choose what vars to plot
+# http://shiny.rstudio.com/articles/layout-guide.html
+
+# running the app automatically:
+# shiny::runApp('~/shinyapp')
+
+# knit when finished
+# knitr::knit('plotly-report.Rmd', 'plotly-report.md')
+# markdown::markdownToHTML('plotly-report.md', 'plotly-report.html')
+```
+
+```{r setup, echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+```{r import, echo=FALSE}
+
+library(dplyr)
+library(crosstalk)
+library(plotly)
+library(DT)
+
+#### Data set 1
+work_dir <- 'C:/Users/Yarden-/Documents/Import plot stocks R script' 
+setwd(work_dir)
+
+# load data
+stocks_raw <- readRDS(file = 
+                        paste(work_dir, 'stocks_data.rds', sep = '/'))
+
+# set a earning indicator
+stocks_raw$earning <- factor(stocks_raw$trailing_3_month_return > 0,
+                             levels = c("TRUE", "FALSE"), 
+                             labels = c('Earning', 'Not earning'))
+# add row names
+# stocks_raw <- stocks_raw %>% tibble::rownames_to_column()
+
+stocks_Shared <- SharedData$new(stocks_raw)
+
+```
+
+<!-- <div class="col2"> -->
+```{r filter_sliders, echo=FALSE}
+
+filter_slider("market_cap", 'Market Capitalization', stocks_Shared, ~market_cap)
+filter_slider("bv_to_assets", 'BV / assets', stocks_Shared, ~bv_to_assets)
+
+# filter_slider("market_cap", 'Market Capitalization', stocks_raw_Shared, ~market_cap)
+# filter_slider("bv_to_assets", 'BV / assets', stocks_raw_Shared, ~bv_to_assets)
+# filter_slider("gross_margin", 'Gross margin', stocks_raw_Shared, ~gross_margin)
+# filter_slider("operating_margin", 'operating margin', stocks_raw_Shared, ~operating_margin)
+# filter_slider("net_profit_margin", 'Net profit margin', stocks_raw_Shared, ~net_profit_margin)
+# filter_slider("ROE", 'ROE', stocks_raw_Shared, ~ROE)
+# filter_slider("ROA", 'ROA', stocks_raw_Shared, ~ROA)
+# filter_slider("trailing_3_month_return", 'Trailing 3 month return', stocks_raw_Shared, ~trailing_3_month_return)
+# filter_slider("PE", 'PE', stocks_raw_Shared, ~PE)
+
+```
+<!-- </div> -->
+
+
+```{r plot_scatter, echo=FALSE}
+
+plot_ly(stocks_Shared, 
+        x = ~market_cap, 
+        y = ~bv_to_assets, 
+        text = rownames(stocks_Shared$data()),
+  mode = "markers", color = ~earning, 
+  size = (stocks_Shared$data()$gross_margin + 1) * 7000 ) %>%
+  layout(dragmode = "select") # %>%
+  # add_trace(mode = "markers") # %>%
+  # crosstalk(dynamic = TRUE, persistent = FALSE,
+            # color = '#377EB8')
+
+
+# plot_ly(sd, x = ~carat, y = ~price, text = paste("Clarity: ", ~clarity),
+#   mode = "markers", color = ~carat, size = ~carat) %>%
+#   layout(dragmode = "select")
+
+```
+
+
+```{r plot_hist, echo=FALSE}
+
+stocks_Shared %>%
+  plot_ly(x = ~earning, type = 'histogram',
+          color = I("black"), alpha = 0.5) %>%
+  
+  add_trace(x = ~earning, type = "histogram",
+            color = I("#377EB8")) %>%
+  layout(barmode="overlay", dragmode = "select",
+         showlegend = FALSE) # %>%
+
+  
+  # crosstalk(on = "plotly_click", persistent = FALSE, showInLegend = FALSE)
+
+```
+
+```{r data_table, echo=FALSE}
+
+datatable(stocks_Shared, filter = 'top')
+          # rownames = as.character(iconv(rownames(stocks_Shared$data()),
+          #                  from = "UTF-8", 
+          #                  to = "UTF-8")))
+
+```
+
