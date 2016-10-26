@@ -5,8 +5,10 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
 # runtime: shiny
+# params allow to later feed in new inputs, while rendering (or 'kniting')
+params:
+ data_file_name: 'NULL'
 ---
-
 
 
 ```{r comments_resources, include=FALSE}
@@ -52,7 +54,6 @@ output:
 # markdown::markdownToHTML('plotly-report.md', 'plotly-report.html')
 # rmarkdown::run("crandash.Rmd")
 
-
 ```
 
 
@@ -80,11 +81,12 @@ try({
 
 
 # load data
+stocks_raw <- readRDS(file = params$data_file_name)
 # stocks_raw <- readRDS(file = 
 #                         paste(work_dir, 'stocks_data.rds', sep = '/'))
 
-stocks_raw <- readRDS(file = 
-                        'stocks_data.rds')
+# stocks_raw <- readRDS(file = data_file_name)
+# stocks_raw <- readRDS(file = 'stocks_data_2.rds')
 
 # set a earning indicator
 stocks_raw$earning <- factor(stocks_raw$trailing_3_month_return > 0,
@@ -95,7 +97,7 @@ stocks_Shared <- SharedData$new(stocks_raw)
 
 ```
 
-Inputs {.sidebar}
+Inputs {.sidebar data-width=700}
 -----------------------------------------------------------------------
 ### Filters
 
@@ -182,17 +184,23 @@ p1_scatter_2 <-
         #                       sep = ''))})(input$y),
         text = rownames(stocks_Shared$data()),
   mode = "markers",
-  color = (function(x){x})(stocks_Shared$data()$price_to_cashflow),
-  size = (function(x){500 * (x + 1) ** 1.1})(stocks_Shared$data()$gross_margin) ) %>%
+  color = (function(x){as.formula(paste('~', x, sep = ''))})('price_to_cashflow'),
+  size = (function(x){500 * (x + 1) ** 1.1})(stocks_Shared$data()$gross_margin)) %>%
   layout(dragmode = "select", 
          xaxis = list(showline = TRUE, zerolinecolor = TRUE, 
                       title = 'Price/BV'),
          yaxis = list(showline = TRUE, zerolinecolor = TRUE,
-                      title = 'Price/Earnings')) %>% 
+                      title = 'Price/Earnings')
+         ) %>% 
   add_markers()
   # add_trace(mode = "markers") # %>%
   
 (p1_scatter_2)
+
+
+# text = ~paste('Country:', country, '<br>Life Expectancy:', lifeExp, '<br>GDP:', gdpPercap,
+#                       '<br>Pop.:', pop)
+
 
 
 ```
@@ -204,14 +212,28 @@ Row {.tabset}
 
 ```{r plot_hist, echo=FALSE}
 
+# p2_hist <- stocks_Shared %>%
+#   plot_ly(x = ~earning, type = 'histogram',
+#   color = I("black"), alpha = 0.5) %>%
+#   
+#   add_trace(x = stocks_Shared$origData()$earning, type = "histogram",
+#   color = I("#377EB8")) %>%
+#   layout(barmode="overlay", dragmode = "select",
+#   showlegend = FALSE) # %>%
+
 p2_hist <- stocks_Shared %>%
-  plot_ly(x = ~earning, type = 'histogram',
-  color = I("black"), alpha = 0.5) %>%
+  plot_ly(alpha = 0.6) %>%
+  add_histogram(x = ~stocks_Shared$data()$earning) %>%
+  # add_histogram(x = ~stocks_Shared$origData()$earning) %>%
+  layout(barmode = "overlay")
   
-  add_trace(x = ~earning, type = "histogram",
-  color = I("#377EB8")) %>%
-  layout(barmode="overlay", dragmode = "select",
-  showlegend = FALSE) # %>%
+  # plot_ly(x = ~earning, type = 'histogram',
+  # color = I("black"), alpha = 0.5) %>%
+  # 
+  # add_trace(x = stocks_Shared$origData()$earning, type = "histogram",
+  # color = I("#377EB8")) %>%
+  # layout(barmode="overlay", dragmode = "select",
+  # showlegend = FALSE) # %>%
 
 (p2_hist)
 
