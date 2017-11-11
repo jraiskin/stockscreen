@@ -10,7 +10,7 @@ from bokeh.plotting import figure
 from bokeh.layouts import layout, widgetbox
 from bokeh.models import ColumnDataSource, HoverTool, LinearInterpolator  # , CustomJS
 from bokeh.models.widgets import Select, TextInput  # , Button, RadioButtonGroup, Toggle
-from bokeh.models.widgets import TableColumn, DataTable, RangeSlider  #, PreText
+from bokeh.models.widgets import TableColumn, DataTable, RangeSlider  # , PreText
 from bokeh.io import curdoc  # , output_notebook
 
 from column_name_conversions import heb_to_eng_names, eng_to_heb_names
@@ -123,10 +123,10 @@ range_slider_returns_this_month = RangeSlider(
 
 
 #~ button_save = Button(label="Download Table as CSV",
-                     #~ button_type="success")
+#~ button_type="success")
 
 #~ x_axis_type_button = RadioButtonGroup(
-        #~ labels=['linear', 'log'], active=0)
+#~ labels=['linear', 'log'], active=0)
 
 #~ button_update = Button(label="Update", button_type="success")
 
@@ -139,9 +139,9 @@ size_mapper = LinearInterpolator(
 # Create Column Data Source that will be used by the plot
 source = ColumnDataSource(
     data={**dict(x=[], y=[], color=[],
-          title=[], alpha=[]),
+                 title=[], alpha=[]),
           **{var: [] for var in stocks_data_columns}
-         }
+          }
 )
 
 # adding data table
@@ -154,7 +154,7 @@ data_table = DataTable(
     #~ fit_columns=True,
     width=1800, height=400,
     #~ sizing_mode='scale_width',
-    )
+)
 
 hover = HoverTool(tooltips=[
     ('Name', '@stock_name'),
@@ -163,15 +163,15 @@ hover = HoverTool(tooltips=[
 ])
 
 p = figure(plot_height=600, plot_width=700, title='',
-       #~ x_axis_type=['linear', 'log'][x_axis_type_button.active],
-       x_axis_type='linear',
-       #~ toolbar_location='right',
-       toolbar_location='above',
-       tools=[hover,
-              'pan', 'wheel_zoom', 'box_select',
-              'box_zoom', 'reset'],
-       active_scroll='wheel_zoom',
-       )
+           #~ x_axis_type=['linear', 'log'][x_axis_type_button.active],
+           x_axis_type='linear',
+           #~ toolbar_location='right',
+           toolbar_location='above',
+           tools=[hover,
+                  'pan', 'wheel_zoom', 'box_select',
+                  'box_zoom', 'reset'],
+           active_scroll='wheel_zoom',
+           )
 #~ p.toolbar.active_scroll = wheel_zoom
 p.circle(x='x', y='y',
          source=source,
@@ -220,7 +220,7 @@ def select_stocks():
             min_current_ratio, max_current_ratio, inclusive=True)) &
         (stocks_data['% תשואה מתחילת החודש'].between(
             min_returns_this_month, max_returns_this_month, inclusive=True))
-        ]
+    ]
 
     if (company_name_val != ""):
         selected = selected[selected.index.str.contains(company_name_val) is True]
@@ -246,7 +246,7 @@ def update():
         stock_market_cap=df['שווי שוק'],
         stock_market_cap_log=np.log10(df['שווי שוק']),
         stock_beta=df['בטא']),
-    **{var: df[var] for var in stocks_data_columns}
+        **{var: df[var] for var in stocks_data_columns}
     }
 
 
@@ -266,24 +266,24 @@ controls = [company_name,
 
 
 #~ def toggleCallback(attr):
-    #~ # Get the layout object added to the documents root
-    #~ l = curdoc().get_model_by_name('mainLayout')
-    #~ listOfSubLayouts = l.children
+#~ # Get the layout object added to the documents root
+#~ l = curdoc().get_model_by_name('mainLayout')
+#~ listOfSubLayouts = l.children
 
-    #~ # Either add or remove the second graph
-    #~ if  toggle.active == False:
-        #~ plotToRemove = curdoc().get_model_by_name('plot2')
-        #~ listOfSubLayouts.remove(plotToRemove)
+#~ # Either add or remove the second graph
+#~ if  toggle.active == False:
+#~ plotToRemove = curdoc().get_model_by_name('plot2')
+#~ listOfSubLayouts.remove(plotToRemove)
 
-    #~ if toggle.active == True:
-        #~ if not curdoc().get_model_by_name('plot2'):
-            #~ p2 = figure(name='plot2')
-            #~ plotToAdd = p2
-            #~ p2.line(x,y2)
-            #~ # print('Remade plot 2')
-        #~ else:
-            #~ plotToAdd = curdoc().get_model_by_name('plot2')
-        #~ listOfSubLayouts.append(plotToAdd)
+#~ if toggle.active == True:
+#~ if not curdoc().get_model_by_name('plot2'):
+#~ p2 = figure(name='plot2')
+#~ plotToAdd = p2
+#~ p2.line(x,y2)
+#~ # print('Remade plot 2')
+#~ else:
+#~ plotToAdd = curdoc().get_model_by_name('plot2')
+#~ listOfSubLayouts.append(plotToAdd)
 
 
 for control in controls:
@@ -303,8 +303,8 @@ for control in controls:
     #~ var filetext = 'שם מניה,שווי שוק\n';
     #~ for (i=0, i < data['שם מניה'].length, i++) {
         #~ var currRow = [data['שם מניה'][i].toString(),
-                       #~ // data['שווי שוק'][i].toString(),
-                       #~ data['שווי שוק'][i].toString().concat('\n')];
+        #~ // data['שווי שוק'][i].toString(),
+        #~ data['שווי שוק'][i].toString().concat('\n')];
 
         #~ var joined = currRow.join();
         #~ filetext = filetext.concat(joined);
@@ -342,7 +342,7 @@ main_layout = layout(
     sizing_mode=sizing_mode,
     #~ sizing_mode='stretch_both',
     responsive=True,
-    )
+)
 
 update()  # initial load of the data
 
